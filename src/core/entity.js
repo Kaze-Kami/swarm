@@ -120,15 +120,26 @@ Entity.prototype.draw = function (ctx) {
     for (let i = this.length - 1; i >= 0; i--) {
         const imp = this.segments[i];
 
-        const size = this.size * (1 - i / this.length);
+        const sizeMod = (1 - i / this.length);
+        const size = (this.size - 5) * sizeMod;
+        const borderSize = (this.size) * sizeMod;
         const lightness = .5 - .5 * (i / self.segments.length);
 
         ctx.setFillStyle(hsla(this.hue, 1, lightness, 1));
+        ctx.setStrokeStyle(hsla(this.hue, 1, lightness, 1));
 
         ctx.save();
         ctx.translate(imp.p);
         ctx.rotate(imp.angle);
         ctx.fillRect(new Vector(), new Vector(size, size));
+        ctx.strokeRect(new Vector(), new Vector(borderSize, borderSize));
+
+        if (i === 0) {
+            // 'fancy head' :^)
+            ctx.line(new Vector(borderSize / 2, size / 2), new Vector(borderSize * 1.2, borderSize * .5));
+            ctx.line(new Vector(borderSize / 2, -size / 2), new Vector(borderSize * 1.2, -borderSize * .5));
+        }
+
         ctx.restore();
     }
 

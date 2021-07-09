@@ -107,7 +107,7 @@ Vector.prototype.normalize = function () {
 }
 
 Vector.prototype.angle = function() {
-    return Math.atan2(this.y, this.x);
+    return Math.atan2(this.x, this.y);
 }
 
 /* vector math in place */
