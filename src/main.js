@@ -8,8 +8,8 @@ import {iRand} from "./math/util.js";
 import Stats from "./lib/stats/stats.module.js";
 import {Attractor} from "./core/attractor.js";
 
-const numEntities = 10;
-const numSegments = 10;
+const numEntities = 20;
+const numSegments = 7;
 
 const spreadSpacing = 5;
 const spreadRadius = 25;
@@ -22,12 +22,12 @@ const vMax = 200;
 const vDamp = 2;
 const aDamp = 1.3;
 const cSpring = 8;
-const fAttractor = 5;
+const fAttractor = 4;
 
 const randomness = .03;
 const acceleration = 650;
 
-const visualize = true;
+const debug = false;
 
 /* Global variables */
 const canvas = document.getElementById('app');
@@ -39,8 +39,10 @@ let viewBounds;
 let entities;
 
 function init() {
-    stats.showPanel(1);
-    document.body.appendChild(stats.dom);
+    if (debug) {
+        stats.showPanel(1);
+        document.body.appendChild(stats.dom);
+    }
 
     entities = [];
 
@@ -51,8 +53,6 @@ function init() {
     for (let i = 0; i < numEntities; i++) {
         const size = iRand(sizeMax, sizeMin);
         const position = FromPolar(alpha, radius);
-
-        console.log(alpha, radius);
 
         alpha += dAlpha;
         if ((i + 1) % spreadSpacing === 0) {
@@ -84,7 +84,7 @@ function animate(timestamp) {
     // skip first run
     if (timestamp === undefined) return;
 
-    stats.begin();
+    if (debug) stats.begin();
     ctx.beginFrame();
 
     ctx.setComposition('source-over');
@@ -93,11 +93,11 @@ function animate(timestamp) {
     entities.forEach(function (entity, _) {
         entity.update(dt, viewBounds);
         entity.draw(ctx);
-        if (visualize) entity.visualizeImpulses(ctx);
+        if (debug) entity.visualizeImpulses(ctx);
     });
 
     ctx.endFrame();
-    stats.end();
+    if (debug) stats.end();
 }
 
 /* helper functions */
