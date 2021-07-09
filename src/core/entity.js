@@ -43,29 +43,33 @@ export function Entity(length, size, randomness, p0, a0, vMin, vMax, vDamp, aDam
 }
 
 Entity.prototype.update = function (dt, viewBounds) {
+    const head = this.segments[0];
     if (this.attractor.active) {
         // move towards attractor
-        this.segments[0].v = this.attractor.p.add(this.p0).iSub(this.segments[0].p).iMul(this.attractor.force);
-        this.segments[0].update(dt);
-        this.segments[0].limit(viewBounds, this.size / 2);
+        head.v = this.attractor.p.add(this.p0).iSub(head.p).iMul(this.attractor.force);
+        head.update(dt);
+        head.limit(viewBounds, this.size / 2);
         this.wasAttracted = true;
     }
-    else if (Math.random() < this.randomness || this.segments[0].v.norm() < this.vMin) {
+    else if (Math.random() < this.randomness || head.v.norm() < this.vMin) {
         // random movement
         const da = RandomUnit(this.a0 * Math.random());
-        this.segments[0].update(dt, da);
+        head.update(dt, da);
     } else {
         // update
-        this.segments[0].update(dt);
+        head.update(dt);
     }
 
     let vMax = undefined;
-    this.wasAttracted = this.attractor.active || this.vMax < this.segments[0].v.norm();
+    this.wasAttracted = this.attractor.active || this.vMax < head.v.norm();
     if (!this.wasAttracted) {
         vMax = this.vMax;
+    } else {
+        // dampen velocity
+        head.v.iDiv(1 + head.vDamp * 2 * dt);
     }
 
-    this.segments[0].limit(viewBounds, this.size / 2, vMax);
+    head.limit(viewBounds, this.size / 2, vMax);
 
 
     // update tail
