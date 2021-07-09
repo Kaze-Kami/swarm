@@ -48,7 +48,7 @@ Context.prototype.translate = function (delta) {
 }
 
 Context.prototype.rotate = function (radians) {
-    this.ctx.rotate(radians);
+    this.ctx.rotate(Math.PI / 2 - radians);
 }
 
 Context.prototype.scale = function (sx, sy) {
@@ -76,6 +76,10 @@ Context.prototype.fillRect = function (pos, size) {
     this.ctx.fillRect(pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y);
 }
 
+Context.prototype.strokeRect = function (pos, size) {
+    this.ctx.strokeRect(pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y);
+}
+
 /* Drawing Paths */
 
 Context.prototype.beginPath = function () {
@@ -96,4 +100,11 @@ Context.prototype.stroke = function () {
 
 Context.prototype.fill = function () {
     this.ctx.fill();
+}
+
+Context.prototype.line = function (p0, p1) {
+    this.beginPath();
+    this.moveTo(p0);
+    this.lineTo(p1);
+    this.stroke();
 }
