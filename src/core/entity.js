@@ -22,6 +22,7 @@ export function Entity(length, size, randomness, p0, a0, vMin, vMax, vDamp, aDam
     this.cSpring = cSpring;
 
     this.attractor = attractor;
+    this.wasAttracted = false;
 
     this.segments = [];
 
@@ -47,17 +48,24 @@ Entity.prototype.update = function (dt, viewBounds) {
         this.segments[0].v = this.attractor.p.add(this.p0).iSub(this.segments[0].p).iMul(this.attractor.force);
         this.segments[0].update(dt);
         this.segments[0].limit(viewBounds, this.size / 2);
+        this.wasAttracted = true;
     }
     else if (Math.random() < this.randomness || this.segments[0].v.norm() < this.vMin) {
         // random movement
         const da = RandomUnit(this.a0 * Math.random());
         this.segments[0].update(dt, da);
-        this.segments[0].limit(viewBounds, this.size / 2, this.vMax);
     } else {
         // update
         this.segments[0].update(dt);
-        this.segments[0].limit(viewBounds, this.size / 2, this.vMax);
     }
+
+    let vMax = undefined;
+    this.wasAttracted = this.attractor.active || this.vMax < this.segments[0].v.norm();
+    if (!this.wasAttracted) {
+        vMax = this.vMax;
+    }
+
+    this.segments[0].limit(viewBounds, this.size / 2, vMax);
 
 
     // update tail
