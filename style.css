@@ -1,0 +1,11 @@
+html, body {
+    width: 100%;
+}
+
+body {
+    background: #101010;
+}
+
+canvas {
+    display: block;
+}
