@@ -88,7 +88,7 @@ function animate(timestamp) {
     ctx.beginFrame();
 
     ctx.setComposition('source-over');
-    const dt = timer.update(timestamp); // 0.016;
+    const dt = Math.min(timer.update(timestamp), 0.02);
 
     entities.forEach(function (entity, _) {
         entity.update(dt, viewBounds);
