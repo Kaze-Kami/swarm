@@ -3,10 +3,10 @@ import {AnimationTimer} from './util/animation_timer.js';
 import {Context} from "./graphics/context.js";
 import {Entity} from "./core/entity.js";
 import {iRand} from "./math/util.js";
+import {Attractor} from "./core/attractor.js";
 
 // external libraries
 import Stats from "./lib/stats/stats.module.js";
-import {Attractor} from "./core/attractor.js";
 
 const numEntities = 20;
 const numSegments = 7;
