@@ -22,7 +22,6 @@ export function Entity(length, size, randomness, p0, a0, vMin, vMax, vDamp, aDam
     this.cSpring = cSpring;
 
     this.attractor = attractor;
-    this.wasAttracted = false;
 
     this.segments = [];
 
@@ -43,33 +42,31 @@ export function Entity(length, size, randomness, p0, a0, vMin, vMax, vDamp, aDam
 }
 
 Entity.prototype.update = function (dt, viewBounds) {
+    let da = new Vector();
     const head = this.segments[0];
-    if (this.attractor.active) {
+    const attracted = this.attractor.active
+
+    if (attracted) {
         // move towards attractor
-        head.v = this.attractor.p.add(this.p0).iSub(head.p).iMul(this.attractor.force);
-        head.update(dt);
-        head.limit(viewBounds, this.size / 2);
-        this.wasAttracted = true;
-    }
-    else if (Math.random() < this.randomness || head.v.norm() < this.vMin) {
-        // random movement
-        const da = RandomUnit(this.a0 * Math.random());
-        head.update(dt, da);
-    } else {
-        // update
-        head.update(dt);
+        da.iAdd(this.attractor.p.sub(head.p).iMul(this.attractor.force))
     }
 
-    let vMax = undefined;
-    this.wasAttracted = this.attractor.active || this.vMax < head.v.norm();
-    if (!this.wasAttracted) {
-        vMax = this.vMax;
-    } else {
+    if (Math.random() < this.randomness || head.v.norm() < this.vMin) {
+        // random movement
+        let a = this.a0
+        if (attracted) {
+            a *= (1 + this.attractor.force) // additional randomness when attracted?
+        }
+        da.iAdd(RandomUnit(a * Math.random()));
+    }
+    head.update(dt, da);
+
+    if (!attracted) {
         // dampen velocity
         head.v.iDiv(1 + head.vDamp * 2 * dt);
     }
 
-    head.limit(viewBounds, this.size / 2, vMax);
+    head.limit(viewBounds, this.size / 2, this.vMax);
 
 
     // update tail

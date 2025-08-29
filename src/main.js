@@ -20,9 +20,9 @@ const sizeMax = 15;
 const vMin = 10;
 const vMax = 200;
 const vDamp = 2;
-const aDamp = 1.3;
+const aDamp = 1.4;
 const cSpring = 8;
-const fAttractor = 4;
+const fAttractor = 2;
 
 const randomness = .03;
 const acceleration = 650;
@@ -30,7 +30,7 @@ const acceleration = 650;
 const debug = false;
 
 /* Global variables */
-const canvas = document.getElementById('app');
+const canvas = document.getElementById('canvas');
 const ctx = new Context(canvas);
 const timer = new AnimationTimer();
 const attractor = new Attractor(fAttractor);
@@ -77,7 +77,15 @@ function init() {
     }
 }
 
+const filterStrength = 20;
+let frameTimeMs = 0, lastFrame = new Date();
+
 function animate(timestamp) {
+    const thisFrame = new Date();
+    frameTimeMs = ((thisFrame - lastFrame) + frameTimeMs * filterStrength) / (filterStrength + 1);
+    lastFrame = thisFrame;
+    document.getElementById("debug").innerHTML = `FPS: ${(1 / (frameTimeMs / 1000)).toFixed(2)}`;
+
     // next callback
     requestAnimationFrame(animate);
 
@@ -105,34 +113,56 @@ function resize() {
     // fetch window size
     const width = window.innerWidth;
     const height = window.innerHeight;
-
-    // resize canvas
-    canvas.width = width * devicePixelRatio;
-    canvas.height = height * devicePixelRatio;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-
-    // update context
-    ctx.scale(devicePixelRatio, devicePixelRatio);
-
+    canvas.width = width;
+    canvas.height = height;
     viewBounds = new Vector(width / 2, height / 2);
 }
 
-/* event listeners */
-window.addEventListener('resize', resize);
+function addEventListeners() {
+    /* event listeners */
+    window.addEventListener('resize', resize);
 
-window.addEventListener('mousedown', function () {
-    attractor.active = true;
-});
+    canvas.addEventListener('mousedown', function (e) {
+        attractor.active = true;
+        attractor.p = new Vector(e.clientX - viewBounds.x, -e.clientY + viewBounds.y);
+    });
 
-window.addEventListener('mouseup', function () {
-    attractor.active = false;
-});
+    canvas.addEventListener('mouseup', function () {
+        attractor.active = false;
+    });
 
-window.addEventListener('mousemove', function (e) {
-    attractor.p = new Vector(e.clientX - viewBounds.x, -e.clientY + viewBounds.y);
-});
+    canvas.addEventListener('mousemove', function (e) {
+        attractor.p = new Vector(e.clientX - viewBounds.x, -e.clientY + viewBounds.y);
+    });
 
-resize();
-init();
-animate();
+    canvas.addEventListener('touchstart', function (e) {
+        attractor.active = true;
+        const touch = e.touches[0]
+        if (!touch) return;
+        attractor.p = new Vector(touch.clientX - viewBounds.x, -touch.clientY + viewBounds.y);
+    });
+
+    canvas.addEventListener('touchend', function () {
+        attractor.active = false;
+    });
+
+    canvas.addEventListener('touchmove', function (e) {
+        const touch = e.touches[0]
+        if (!touch) return;
+        document.getElementById("debug").innerText = `DEBUG: ${touch}`;
+        attractor.p = new Vector(touch.clientX - viewBounds.x, -touch.clientY + viewBounds.y);
+    })
+
+    resize();
+    init();
+    animate();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener('DOMContentLoaded', function (e) {
+        addEventListeners();
+    });
+}
+else {
+    addEventListeners();
+}
